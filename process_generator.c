@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
             i++;
         }
     }
+    fclose(fp);
 
     // // print Processes
     // for (int i = 0; i < Nlines; i++)
