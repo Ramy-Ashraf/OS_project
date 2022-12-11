@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/Ramy.Ashraf/Desktop/OS_project",
-      "program": "c:/Users/Ramy.Ashraf/Desktop/OS_project/build/Debug/outDebug",
+      "cwd": "c:/Users/Ramy.Ashraf/Desktop/os_shared/OS_project",
+      "program": "c:/Users/Ramy.Ashraf/Desktop/os_shared/OS_project/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
