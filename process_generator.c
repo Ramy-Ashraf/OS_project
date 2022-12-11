@@ -4,23 +4,29 @@ void clearResources(int);
 
 int main(int argc, char *argv[])
 {
-    char str[100];
-    int Nlines = 0 ,i = 0;
-    char ch;
+    //checking number of arguments entered in the terminal
+    if (argc<4)
+    {	 
+		printf("Too few arguments. Exiting!\n");         
+		exit(1);
+    }
 
     signal(SIGINT, clearResources);
     
     // TODO Initialization
     // 1. Read the input files.
-    // 2. Read the chosen scheduling algorithm and its parameters, if there are any from the argument list.
-    // 3. Initiate and create the scheduler and clock processes.
-    // 4. Use this function after creating the clock process to initialize clock.
+
+    char str[100];
+    int Nlines = 0 ,i = 0;
+    char ch;
+
     FILE *fp;
     fp = fopen("processes.txt", "r");
     if (fp == NULL)
     {
         printf("Error opening file");
         exit(1);
+        printf("\n");
     }
 
     // get number of lines in fp but skip any line stating with "#"
@@ -41,7 +47,6 @@ int main(int argc, char *argv[])
             i++;
         }
     }
-    fclose(fp);
 
     // // print Processes
     // for (int i = 0; i < Nlines; i++)
@@ -53,19 +58,46 @@ int main(int argc, char *argv[])
     //     printf("\n");
     // }
 
-     initClk();
+    // 2. Read the chosen scheduling algorithm and its parameters, if there are any from the argument list.
+
+        char algo;
+        algo=atoi(argv[2]);
+
+        printf("The algorithm you chose is : ");
+        if(algo==1)
+        {
+            printf("Shortest job first\n");
+        }
+        else if(algo==2)
+        {
+            printf("Preemptive Highest Priority First\n");
+        }
+        else if(algo==3)
+        {
+            printf("Round Robin\n");
+        }
+        else if(algo==4)
+        {
+            printf("Multiple level Feedback Loop\n");
+        }
+
+    // 3. Initiate and create the scheduler and clock processes.
+
+    // 4. Use this function after creating the clock process to initialize clock.
+
+    //  initClk();
      // To get time use this function. 
      int x = getClk();
-     printf("Current Time is %d\n", x);
+    //  printf("Current Time is %d\n", x);
+
      // TODO Generation Main Loop
      // 5. Create a data structure for processes and provide it with its parameters.
      // 6. Send the information to the scheduler at the appropriate time.
-     // 7. Clear clock resources
-    
     
      destroyClk(true);
 }
-
+     
+// 7. Clear clock resources
 void clearResources(int signum)
 {
     //TODO Clears all resources in case of interruption
