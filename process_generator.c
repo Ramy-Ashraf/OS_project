@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     char ch;
 
     FILE *fp;
-    fp = fopen("processes.txt", "r");
+    fp = fopen(argv[1], "r");
     if (fp == NULL)
     {
         printf("Error opening file");
