@@ -32,5 +32,12 @@
     "**/.*/**",
     "**/.vscode",
     "**/.vscode/**"
+  ],
+  "makefile.launchConfigurations": [
+    {
+      "cwd": "/workspaces/OS_project",
+      "binaryPath": "/workspaces/OS_project/process_generator.out",
+      "binaryArgs": []
+    }
   ]
 }

@@ -2,23 +2,34 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "C/C++ Runner: Debug Session",
+      "name": "(gdb) Pipe Launch",
       "type": "cppdbg",
       "request": "launch",
+      "program": "${workspaceFolder}/process_generator.out",
       "args": [],
       "stopAtEntry": false,
-      "externalConsole": true,
-      "cwd": "c:/Users/Ramy.Ashraf/Desktop/os_shared/OS_project",
-      "program": "c:/Users/Ramy.Ashraf/Desktop/os_shared/OS_project/build/Debug/outDebug",
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": false,
+      "pipeTransport": {
+        "debuggerPath": "/usr/bin/gdb",
+        "pipeProgram": "/usr/bin/ssh",
+        "pipeArgs": [],
+        "pipeCwd": ""
+      },
       "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
       "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
+          {
+              "description": "Enable pretty-printing for gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+          },
+          {
+              "description": "Set Disassembly Flavor to Intel",
+              "text": "-gdb-set disassembly-flavor intel",
+              "ignoreFailures": true
+          }
       ]
-    }
+    },
   ]
 }
