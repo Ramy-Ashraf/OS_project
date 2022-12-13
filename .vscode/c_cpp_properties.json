@@ -10,13 +10,18 @@
             "cStandard": "${default}",
             "cppStandard": "${default}",
             "intelliSenseMode": "linux-gcc-x64",
+            "compilerArgs": [
+                ""
+            ],
+            "configurationProvider": "ms-vscode.makefile-tools",
             "mergeConfigurations": false,
             "browse": {
                 "path": [
                     "${workspaceFolder}/**"
                 ],
                 "limitSymbolsToIncludedHeaders": true
-            }
+            },
+
         },
         {
             "name": "windows-gcc-x64",
@@ -38,7 +43,7 @@
                 ],
                 "limitSymbolsToIncludedHeaders": true
             }
-        }       
+        }
     ],
     "version": 4
 }
