@@ -1,6 +1,24 @@
 {
     "configurations": [
         {
+            "name": "linux-gcc-x64",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "${default}",
+            "cppStandard": "${default}",
+            "intelliSenseMode": "linux-gcc-x64",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        },
+        {
             "name": "windows-gcc-x64",
             "includePath": [
                 "${workspaceFolder}/**"
@@ -12,8 +30,15 @@
             "compilerArgs": [
                 ""
             ],
-            "configurationProvider": "ms-vscode.makefile-tools"
-        }
+            "configurationProvider": "ms-vscode.makefile-tools",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }       
     ],
     "version": 4
 }
