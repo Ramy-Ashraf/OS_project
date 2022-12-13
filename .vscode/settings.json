@@ -39,5 +39,8 @@
       "binaryPath": "/workspaces/OS_project/process_generator.out",
       "binaryArgs": []
     }
-  ]
+  ],
+  "files.associations": {
+    "headers.h": "c"
+  }
 }
