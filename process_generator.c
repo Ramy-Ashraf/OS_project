@@ -4,6 +4,7 @@ void clearResources(int);
 
 int main(int argc, char *argv[])
 {
+     signal(SIGINT,clearResources);	
     //checking number of arguments entered in the terminal
     if (argc<4)
     {	 
@@ -82,10 +83,24 @@ int main(int argc, char *argv[])
         }
 
     // 3. Initiate and create the scheduler and clock processes.
-
+    int pid=fork();
+    int stat_loc;
+    if(pid==0) //clock
+    {
+        execv("clk.c",argv);
+    }
+    else if(pid!=-1) //process generator
+    {
+        fork();
+        if(pid==0) //schedular
+        {
+            execv("scheduler.c",argv);
+        }
+        
+    }
     // 4. Use this function after creating the clock process to initialize clock.
 
-    //  initClk();
+      initClk();
      // To get time use this function. 
      int x = getClk();
     //  printf("Current Time is %d\n", x);
@@ -93,15 +108,44 @@ int main(int argc, char *argv[])
      // TODO Generation Main Loop
      // 5. Create a data structure for processes and provide it with its parameters.
      // 6. Send the information to the scheduler at the appropriate time.
+    key_t key_id;
+    int send_val;
+    struct msgbuff message;
+    key_id = ftok("keyfile", 65); 
+    int msgq_id = msgget(key_id, 0666 | IPC_CREAT); 
+    if (key_id == -1)
+    {
+    perror("Error in create");
+    exit(-1);
+    }
+    for(int i=0;i<Nlines;i++)
+    {
+    while(getClk()<Processes[i][1]) //checking if the process i has arrived or not
+    {}
+    //Send Schduler info of process arrived
+    message.processParameters[0]=Processes[i][0]; //sending id of process
+    message.processParameters[1]=Processes[i][1]; //sending arrival time of process
+    message.processParameters[2]=Processes[i][2]; //sending runtime of process
+    message.processParameters[3]=Processes[i][3]; //sending priority of process
+    message.mtype=Processes[i][0];
+    int send_val = msgsnd(msgq_id, &message, sizeof(message.processParameters), !IPC_NOWAIT);
+    }
+    pid = wait(&stat_loc); 
+    if(!(stat_loc & 0x00FF))
+    {
+        destroyClk(true);
+        msgctl(key_id, IPC_RMID, (struct msqid_ds *)0);
+        exit(0);
+    }
     
-     destroyClk(true);
 }
      
 // 7. Clear clock resources
-void clearResources(int signum)
+void clearResources(int key_id)
 {
     //TODO Clears all resources in case of interruption
-    destroyClk(false);
-    exit(signum);
+    destroyClk(true);
+    msgctl(key_id, IPC_RMID, (struct msqid_ds *)0);
+    exit(0);
 
 }
