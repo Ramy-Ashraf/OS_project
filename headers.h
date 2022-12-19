@@ -11,11 +11,14 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include "queues.h"
+
 typedef short bool;
 #define true 1
 #define false 0
 
 #define SHKEY 300
+#define MQKEY 1337
 
 ///==============================
 //don't mess with this variable//
