@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     }
     else if(clockPID == 0)
     {
-        execl("clk.out", NULL);
+        execl("clk.out", "clk.out", NULL);
         perror("Error creating clock process!\n");
         exit(1);
     }
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     }
     if(schedulerPID == 0)
     {
-        execl("scheduler.out", itoa((int)schedulingAlgorithm), itoa(quantum), NULL);
+        execl("scheduler.out", "scheduler.out", argv[3], schedulingAlgorithm == ALGO_RR ? argv[5] : "-1", NULL);
         perror("Error creating scheduler process!\n");
         exit(1);
     }
@@ -151,30 +151,36 @@ int main(int argc, char *argv[])
         while(processQueue->start->arrivalTime < getClk());
         msg.mType = schedulerPID;
         msg.action = ACT_NOACT;
-        msg.attachedProcess = dequeue_Process(processQueue);
+        msg.attachedProcess.id = processQueue->start->id;
+        msg.attachedProcess.arrivalTime = processQueue->start->arrivalTime;
+        msg.attachedProcess.runTime = processQueue->start->runTime;
+        msg.attachedProcess.priority = processQueue->start->priority;
+        free(dequeue_Process(processQueue));
 
         msgsnd(msgqID, &msg, sizeof(msg)-sizeof(msg.mType), !IPC_NOWAIT);
     }
+
+    free(processQueue);
 
     // 7. Clear clock resources
     int pStatus;
     while(true)
     {
-        waitpid(schedulerPID, &pStatus, NULL);
+        waitpid(schedulerPID, &pStatus, 0);
         if (WIFEXITED(pStatus))
         {
             break;
         } 
     }
     
+    msgctl(msgqID, IPC_RMID, (struct msqid_ds*) 0);
     destroyClk(true);
-    msgctl(msgqID, IPC_RMID, (struct msqid_ds *)0);
     exit(0);
 }
 
 void clearResources(int signum)
 {
     //TODO Clears all resources in case of interruption
+    msgctl(msgqID, IPC_RMID, (struct msqid_ds*) 0);
     destroyClk(true);
-    msgctl(msgqID, IPC_RMID, (struct msqid_ds *)0);
 }

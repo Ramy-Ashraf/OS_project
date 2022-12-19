@@ -43,6 +43,7 @@
   "files.associations": {
     "headers.h": "c",
     "queues.h": "c",
-    "system_error": "c"
+    "stdio.h": "c",
+    "types.h": "c"
   }
 }

@@ -26,7 +26,7 @@ struct Message
 {
     long mType;
     enum Action{ACT_NOACT, ACT_START=1, ACT_STOP} action;
-    struct Node_Process* attachedProcess;
+    struct Node_Process attachedProcess;
 };
 
 ///==============================

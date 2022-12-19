@@ -34,7 +34,7 @@ struct Queue_Process* createQueue_Process()
     return newQueue;
 }
 
-void enqueue_Process(struct Queue_Process* queue, struct Node_Process* process)
+void enqueue_Process(struct Queue_Process* const queue, struct Node_Process* const process)
 {
     if (queue->end == NULL)
     {
@@ -48,7 +48,7 @@ void enqueue_Process(struct Queue_Process* queue, struct Node_Process* process)
     }
 }
 
-struct Node_Process* dequeue_Process(struct Queue_Process* queue)
+struct Node_Process* dequeue_Process(struct Queue_Process* const queue)
 {
     struct Node_Process* process = NULL;
     if(queue->start)
@@ -66,6 +66,7 @@ struct Node_Process* dequeue_Process(struct Queue_Process* queue)
 struct Node_PCB
 {
     struct Node_Process* process;
+    pid_t pid;
     enum Status{STAT_READY, STAT_RUNNING, STAT_BLOCKED} status;
     int priority;
     int remainingTime;
@@ -74,9 +75,11 @@ struct Node_PCB
     struct Node_PCB* next;
 };
 
-struct Node_PCB* createPCB(struct Node_Process* _process)
+struct Node_PCB* createPCB(pid_t _pid, struct Node_Process* const _process)
 {
     struct Node_PCB* newPCB = malloc(sizeof(struct Node_PCB));
+    newPCB->process = _process;
+    newPCB->pid = _pid;
     newPCB->status = STAT_READY;
     newPCB->priority = _process->priority;
     newPCB->remainingTime = _process->runTime;
@@ -102,7 +105,7 @@ struct Queue_PCB* createQueue_PCB()
     return newQueue;
 }
 
-void normalEnqueue_PCB(struct Queue_PCB* queue, struct Node_PCB* PCB)
+void normalEnqueue_PCB(struct Queue_PCB* const queue, struct Node_PCB* const PCB)
 {
     if (queue->end == NULL)
     {
@@ -116,7 +119,7 @@ void normalEnqueue_PCB(struct Queue_PCB* queue, struct Node_PCB* PCB)
     }
 }
 
-void priorityEnqueue_PCB(struct Queue_PCB* queue, struct Node_PCB* PCB)
+void priorityEnqueue_PCB(struct Queue_PCB* const queue, struct Node_PCB* const PCB, int priority)
 {
     if (queue->end == NULL)
     {
@@ -126,7 +129,7 @@ void priorityEnqueue_PCB(struct Queue_PCB* queue, struct Node_PCB* PCB)
     else
     {
         struct Node_PCB* current = queue->start;
-        while(current->next && current->next->priority <= PCB->priority)
+        while(current->next && current->next->priority <= priority)
         {
             current = current->next;
         }
@@ -136,7 +139,7 @@ void priorityEnqueue_PCB(struct Queue_PCB* queue, struct Node_PCB* PCB)
     }
 }
 
-struct Node_PCB* dequeue_PCB(struct Queue_PCB* queue)
+struct Node_PCB* dequeue_PCB(struct Queue_PCB* const queue)
 {
     struct Node_PCB* PCB = NULL;
     if(queue->start)
@@ -163,7 +166,7 @@ struct Node_Log
     struct Node_Log* next;
 };
 
-struct Node_Log* createLog(int _time, enum Event _event, struct Node_PCB* _PCB)
+struct Node_Log* createLog(int _time, enum Event _event, struct Node_PCB* const _PCB)
 {
     struct Node_Log* newLog = malloc(sizeof(struct Node_Log));
     newLog->time = _time;
@@ -193,7 +196,7 @@ struct Queue_Log* createQueue_Log()
     return newQueue;
 }
 
-void enqueue_Log(struct Queue_Log* queue, struct Node_Log* log)
+void enqueue_Log(struct Queue_Log* const queue, struct Node_Log* const log)
 {
     if (queue->end == NULL)
     {
@@ -207,7 +210,7 @@ void enqueue_Log(struct Queue_Log* queue, struct Node_Log* log)
     }
 }
 
-struct Node_Log* dequeue_Log(struct Queue_Log* queue)
+struct Node_Log* dequeue_Log(struct Queue_Log* const queue)
 {
     struct Node_Log* log = NULL;
     if(queue->start)
