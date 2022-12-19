@@ -42,13 +42,7 @@
   ],
   "files.associations": {
     "headers.h": "c",
-    "file.h": "c",
-    "stdio.h": "c",
-    "types.h": "c",
-    "unistd.h": "c",
     "queues.h": "c",
-    "signal.h": "c",
-    "ipc.h": "c",
-    "stat.h": "c"
+    "system_error": "c"
   }
 }

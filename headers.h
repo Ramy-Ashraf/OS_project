@@ -24,7 +24,7 @@ enum Algorithm{ALGO_SJF=1, ALGO_HPF, ALGO_RR, ALGO_MLFQ};
 
 struct Message
 {
-    int mType;
+    long mType;
     enum Action{ACT_NOACT, ACT_START=1, ACT_STOP} action;
     struct Node_Process* attachedProcess;
 };
