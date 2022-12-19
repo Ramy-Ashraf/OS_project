@@ -42,8 +42,6 @@
   ],
   "files.associations": {
     "headers.h": "c",
-    "queues.h": "c",
-    "stdio.h": "c",
-    "types.h": "c"
+    "queues.h": "c"
   }
 }

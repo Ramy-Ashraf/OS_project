@@ -35,6 +35,28 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    switch (schedulingAlgorithm)
+    {
+    case ALGO_SJF:
+        Algorithm_SJF(&logQueue, &processorIdleTime, &processWaitingTime, &processWeightedTurnaround, &processNumber);
+        break;
+    
+    case ALGO_HPF:
+        Algorithm_HPF(&logQueue, &processorIdleTime, &processWaitingTime, &processWeightedTurnaround, &processNumber);
+        break;
+
+    case ALGO_RR:
+        Algorithm_RR(&quantum, &logQueue, &processorIdleTime, &processWaitingTime, &processWeightedTurnaround, &processNumber);
+        break;
+
+    case ALGO_MLFQ:
+        Algorithm_MLFQ(&logQueue, &processorIdleTime, &processWaitingTime, &processWeightedTurnaround, &processNumber);
+        break;
+
+    default:
+        break;
+    } 
+
     //TODO: upon termination release the clock resources.
     msgctl(msgqID, IPC_RMID, (struct msqid_ds*) 0);
     destroyClk(true);
