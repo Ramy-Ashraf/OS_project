@@ -58,8 +58,7 @@ int main(int argc, char *argv[])
     } 
 
     //TODO: upon termination release the clock resources.
-    msgctl(msgqID, IPC_RMID, (struct msqid_ds*) 0);
-    destroyClk(true);
+    destroyClk(false);
     exit(0);
 }
 
@@ -72,7 +71,20 @@ void Algorithm_SJF(struct Queue_Log** const logQueue, int* const processorIdleTi
 
     if (msgrcv(msgqID, &receivedProcess, sizeof(receivedProcess.attachedProcess), getpid(), IPC_NOWAIT) != -1)
     {
-        struct Node_PCB* newPCB = createPCB(0, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
+        pid_t processPID = fork();
+        if(processPID == -1)
+        {
+            perror("Error creating new process!\n");
+            exit(1);
+        }
+        else if(processPID == 0)
+        {
+            execl("process.out", "process.out", itoa(receivedProcess.attachedProcess.runTime), NULL);
+            perror("Error creating new process!\n");
+            exit(1);
+        }
+
+        struct Node_PCB* newPCB = createPCB(processPID, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
         /*  GOOD LUCK   */
     }
 }
@@ -86,7 +98,20 @@ void Algorithm_HPF(struct Queue_Log** const logQueue, int* const processorIdleTi
 
     if (msgrcv(msgqID, &receivedProcess, sizeof(receivedProcess.attachedProcess), getpid(), IPC_NOWAIT) != -1)
     {
-        struct Node_PCB* newPCB = createPCB(0, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
+        pid_t processPID = fork();
+        if(processPID == -1)
+        {
+            perror("Error creating new process!\n");
+            exit(1);
+        }
+        else if(processPID == 0)
+        {
+            execl("process.out", "process.out", itoa(receivedProcess.attachedProcess.runTime), NULL);
+            perror("Error creating new process!\n");
+            exit(1);
+        }
+
+        struct Node_PCB* newPCB = createPCB(processPID, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
         /*  GOOD LUCK   */
     }
 }
@@ -100,7 +125,20 @@ void Algorithm_RR(int* const quantum, struct Queue_Log** const logQueue, int* co
 
     if (msgrcv(msgqID, &receivedProcess, sizeof(receivedProcess.attachedProcess), getpid(), IPC_NOWAIT) != -1)
     {
-        struct Node_PCB* newPCB = createPCB(0, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
+        pid_t processPID = fork();
+        if(processPID == -1)
+        {
+            perror("Error creating new process!\n");
+            exit(1);
+        }
+        else if(processPID == 0)
+        {
+            execl("process.out", "process.out", itoa(receivedProcess.attachedProcess.runTime), NULL);
+            perror("Error creating new process!\n");
+            exit(1);
+        }
+
+        struct Node_PCB* newPCB = createPCB(processPID, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
         /*  GOOD LUCK   */
     }
 }
@@ -114,7 +152,20 @@ void Algorithm_MLFQ(struct Queue_Log** const logQueue, int* const processorIdleT
 
     if (msgrcv(msgqID, &receivedProcess, sizeof(receivedProcess.attachedProcess), getpid(), IPC_NOWAIT) != -1)
     {
-        struct Node_PCB* newPCB = createPCB(0, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
+        pid_t processPID = fork();
+        if(processPID == -1)
+        {
+            perror("Error creating new process!\n");
+            exit(1);
+        }
+        else if(processPID == 0)
+        {
+            execl("process.out", "process.out", itoa(receivedProcess.attachedProcess.runTime), NULL);
+            perror("Error creating new process!\n");
+            exit(1);
+        }
+
+        struct Node_PCB* newPCB = createPCB(processPID, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
         /*  GOOD LUCK   */
     }
 }

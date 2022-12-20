@@ -1,6 +1,6 @@
 #include "headers.h"
 
-void clearResources(int);
+void clearResources(int signum);
 
 int msgqID;
 
@@ -172,8 +172,7 @@ int main(int argc, char *argv[])
         } 
     }
     
-    msgctl(msgqID, IPC_RMID, (struct msqid_ds*) 0);
-    destroyClk(true);
+    clearResources(SIGINT);
     exit(0);
 }
 

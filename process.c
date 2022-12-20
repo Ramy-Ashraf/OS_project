@@ -9,12 +9,13 @@ int main(int agrc, char *argv[])
 
     //TODO The process needs to get the remaining time from somewhere
     //remainingtime = ??;
+    remainingtime = atoi(argv[1]);
+
     while (remainingtime > 0)
     {
         // remainingtime = ??;
     }
 
     destroyClk(false);
-
-    return 0;
+    exit(0);
 }
