@@ -120,7 +120,12 @@ int main(int argc, char *argv[])
     }
     if(schedulerPID == 0)
     {
-        execl("scheduler.out", "scheduler.out", argv[3], schedulingAlgorithm == ALGO_RR ? argv[5] : "-1", NULL);
+        char sch[5];
+        sprintf(sch, "%d", schedulingAlgorithm);
+        char q[5];
+        sprintf(q, "%d", quantum);
+
+        execl("scheduler.out", "scheduler.out", sch, q, NULL);
         perror("Error creating scheduler process!\n");
         exit(1);
     }

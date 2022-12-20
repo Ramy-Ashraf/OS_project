@@ -79,7 +79,10 @@ void Algorithm_SJF(struct Queue_Log** const logQueue, int* const processorIdleTi
         }
         else if(processPID == 0)
         {
-            execl("process.out", "process.out", itoa(receivedProcess.attachedProcess.runTime), NULL);
+            char rt[5];
+            sprintf(rt, "%d", receivedProcess.attachedProcess.runTime);
+
+            execl("process.out", "process.out", rt, NULL);
             perror("Error creating new process!\n");
             exit(1);
         }
@@ -106,7 +109,10 @@ void Algorithm_HPF(struct Queue_Log** const logQueue, int* const processorIdleTi
         }
         else if(processPID == 0)
         {
-            execl("process.out", "process.out", itoa(receivedProcess.attachedProcess.runTime), NULL);
+            char rt[5];
+            sprintf(rt, "%d", receivedProcess.attachedProcess.runTime);
+
+            execl("process.out", "process.out", rt, NULL);
             perror("Error creating new process!\n");
             exit(1);
         }
@@ -133,7 +139,10 @@ void Algorithm_RR(int* const quantum, struct Queue_Log** const logQueue, int* co
         }
         else if(processPID == 0)
         {
-            execl("process.out", "process.out", itoa(receivedProcess.attachedProcess.runTime), NULL);
+            char rt[5];
+            sprintf(rt, "%d", receivedProcess.attachedProcess.runTime);
+
+            execl("process.out", "process.out", rt, NULL);
             perror("Error creating new process!\n");
             exit(1);
         }
@@ -160,7 +169,10 @@ void Algorithm_MLFQ(struct Queue_Log** const logQueue, int* const processorIdleT
         }
         else if(processPID == 0)
         {
-            execl("process.out", "process.out", itoa(receivedProcess.attachedProcess.runTime), NULL);
+            char rt[5];
+            sprintf(rt, "%d", receivedProcess.attachedProcess.runTime);
+
+            execl("process.out", "process.out", rt, NULL);
             perror("Error creating new process!\n");
             exit(1);
         }
