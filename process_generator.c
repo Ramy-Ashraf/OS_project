@@ -144,20 +144,19 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    struct Message msg;
+    struct Message_Process sentProcess;
 
     while (processQueue->start)
     {
         while(processQueue->start->arrivalTime < getClk());
-        msg.mType = schedulerPID;
-        msg.action = ACT_NOACT;
-        msg.attachedProcess.id = processQueue->start->id;
-        msg.attachedProcess.arrivalTime = processQueue->start->arrivalTime;
-        msg.attachedProcess.runTime = processQueue->start->runTime;
-        msg.attachedProcess.priority = processQueue->start->priority;
+        sentProcess.mType = schedulerPID;
+        sentProcess.attachedProcess.id = processQueue->start->id;
+        sentProcess.attachedProcess.arrivalTime = processQueue->start->arrivalTime;
+        sentProcess.attachedProcess.runTime = processQueue->start->runTime;
+        sentProcess.attachedProcess.priority = processQueue->start->priority;
         free(dequeue_Process(processQueue));
 
-        msgsnd(msgqID, &msg, sizeof(msg)-sizeof(msg.mType), !IPC_NOWAIT);
+        msgsnd(msgqID, &sentProcess, sizeof(sentProcess.attachedProcess), !IPC_NOWAIT);
     }
 
     free(processQueue);

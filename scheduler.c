@@ -68,11 +68,11 @@ void Algorithm_SJF(struct Queue_Log** const logQueue, int* const processorIdleTi
 {
     struct Queue_PCB* queue = createQueue_PCB();
 
-    struct Message msg;
+    struct Message_Process receivedProcess;
 
-    if (msgrcv(msgqID, &msg, sizeof(msg)-sizeof(msg.mType), getpid(), IPC_NOWAIT) != -1)
+    if (msgrcv(msgqID, &receivedProcess, sizeof(receivedProcess.attachedProcess), getpid(), IPC_NOWAIT) != -1)
     {
-        struct Node_PCB* newPCB = createPCB(0, createProcess(msg.attachedProcess.id, msg.attachedProcess.arrivalTime, msg.attachedProcess.runTime, msg.attachedProcess.priority));
+        struct Node_PCB* newPCB = createPCB(0, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
         /*  GOOD LUCK   */
     }
 }
@@ -82,11 +82,11 @@ void Algorithm_HPF(struct Queue_Log** const logQueue, int* const processorIdleTi
 {
     struct Queue_PCB* queue = createQueue_PCB();
 
-    struct Message msg;
+    struct Message_Process receivedProcess;
 
-    if (msgrcv(msgqID, &msg, sizeof(msg)-sizeof(msg.mType), getpid(), IPC_NOWAIT) != -1)
+    if (msgrcv(msgqID, &receivedProcess, sizeof(receivedProcess.attachedProcess), getpid(), IPC_NOWAIT) != -1)
     {
-        struct Node_PCB* newPCB = createPCB(0, createProcess(msg.attachedProcess.id, msg.attachedProcess.arrivalTime, msg.attachedProcess.runTime, msg.attachedProcess.priority));
+        struct Node_PCB* newPCB = createPCB(0, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
         /*  GOOD LUCK   */
     }
 }
@@ -96,11 +96,11 @@ void Algorithm_RR(int* const quantum, struct Queue_Log** const logQueue, int* co
 {
     struct Queue_PCB* queue = createQueue_PCB();
 
-    struct Message msg;
+    struct Message_Process receivedProcess;
 
-    if (msgrcv(msgqID, &msg, sizeof(msg)-sizeof(msg.mType), getpid(), IPC_NOWAIT) != -1)
+    if (msgrcv(msgqID, &receivedProcess, sizeof(receivedProcess.attachedProcess), getpid(), IPC_NOWAIT) != -1)
     {
-        struct Node_PCB* newPCB = createPCB(0, createProcess(msg.attachedProcess.id, msg.attachedProcess.arrivalTime, msg.attachedProcess.runTime, msg.attachedProcess.priority));
+        struct Node_PCB* newPCB = createPCB(0, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
         /*  GOOD LUCK   */
     }
 }
@@ -110,11 +110,11 @@ void Algorithm_MLFQ(struct Queue_Log** const logQueue, int* const processorIdleT
 {
     struct Queue_PCB* queue = createQueue_PCB();
 
-    struct Message msg;
+    struct Message_Process receivedProcess;
 
-    if (msgrcv(msgqID, &msg, sizeof(msg)-sizeof(msg.mType), getpid(), IPC_NOWAIT) != -1)
+    if (msgrcv(msgqID, &receivedProcess, sizeof(receivedProcess.attachedProcess), getpid(), IPC_NOWAIT) != -1)
     {
-        struct Node_PCB* newPCB = createPCB(0, createProcess(msg.attachedProcess.id, msg.attachedProcess.arrivalTime, msg.attachedProcess.runTime, msg.attachedProcess.priority));
+        struct Node_PCB* newPCB = createPCB(0, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
         /*  GOOD LUCK   */
     }
 }

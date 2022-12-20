@@ -22,11 +22,16 @@ typedef short bool;
 
 enum Algorithm{ALGO_SJF=1, ALGO_HPF, ALGO_RR, ALGO_MLFQ};
 
-struct Message
+struct Message_Process
+{
+    long mType;
+    struct Node_Process attachedProcess;
+};
+
+struct Message_Action
 {
     long mType;
     enum Action{ACT_NOACT, ACT_START=1, ACT_STOP} action;
-    struct Node_Process attachedProcess;
 };
 
 ///==============================
