@@ -3,22 +3,23 @@
 void clearResources(int signum);
 
 int msgqID;
+int currentTime = 0;
 
 int main(int argc, char *argv[])
 {
     signal(SIGINT, clearResources);
     // TODO Initialization
     // 1. Read the input files.
-    struct Queue_Process* processQueue = createQueue_Process();
-    
+    struct Queue_Process *processQueue = createQueue_Process();
+
     {
-        if(argc < 2)
+        if (argc < 2)
         {
             perror("Error! Please make sure you added a correct input file name as your first argument\n");
             exit(1);
         }
 
-        FILE* inputFile = fopen(argv[1], "r");
+        FILE *inputFile = fopen(argv[1], "r");
         if (!inputFile)
         {
             perror("Error! Please make sure you added a correct input file name as your first argument\n");
@@ -30,11 +31,11 @@ int main(int argc, char *argv[])
         int runTime;
         int priority;
 
-        while(true)
+        for (int i = 0; i < 5; i++)
         {
-            int result = scanf("%d\t%d\t%d\t%d", &id, &arrivalTime, &runTime, &priority);
+            int result = fscanf(inputFile, "%d\t%d\t%d\t%d", &id, &arrivalTime, &runTime, &priority);
 
-            if(result == -1)
+            if (result == EOF)
             {
                 break;
             }
@@ -42,8 +43,13 @@ int main(int argc, char *argv[])
             {
                 enqueue_Process(processQueue, createProcess(id, arrivalTime, runTime, priority));
             }
+            else
+            {
+                while (fgetc(inputFile) != '\n')
+                    ;
+            }
         }
-        
+
         if (processQueue->start == NULL)
         {
             perror("Error! Please make sure you added a correct input file name as your first argument\n");
@@ -56,56 +62,56 @@ int main(int argc, char *argv[])
     int quantum = -1;
 
     {
-        if(argc < 4)
+        if (argc < 4)
         {
             perror("Error! Please make sure you chose a scheduling algorithm\n");
             exit(1);
         }
-        if(argv[2] != "-sch")
+        if (strcmp(argv[2], "-sch") != 0)
         {
             perror("Error! Please make sure you chose a scheduling algorithm\n");
             exit(1);
         }
 
         int sch = atoi(argv[3]);
-        if( sch < (int) ALGO_SJF || sch > (int) ALGO_MLFQ)
+        if (sch < (int)ALGO_SJF || sch > (int)ALGO_MLFQ)
         {
             perror("Error! Please make sure you chose a correct scheduling algorithm\n");
             exit(1);
         }
 
-        schedulingAlgorithm = (enum Algorithm) sch;
+        schedulingAlgorithm = (enum Algorithm)sch;
         if (schedulingAlgorithm == ALGO_RR)
         {
-            if(argc < 6)
+            if (argc < 6)
             {
                 perror("Error! Please specify a quantum size for Round Robin Algorithm\n");
                 exit(1);
             }
-            if(argv[4] != "-q")
+            if (strcmp(argv[4], "-q") != 0)
             {
                 perror("Error! Please specify a quantum size for Round Robin Algorithm\n");
                 exit(1);
             }
 
             int q = atoi(argv[5]);
-            if(q <= 0)
+            if (q <= 0)
             {
                 perror("Error! Please specify a correct quantum size for Round Robin Algorithm\n");
                 exit(1);
             }
             quantum = q;
-        }       
+        }
     }
 
     // 3. Initiate and create the scheduler and clock processes.
     pid_t clockPID = fork();
-    if(clockPID == -1)
+    if (clockPID == -1)
     {
         perror("Error creating clock process!\n");
         exit(1);
     }
-    else if(clockPID == 0)
+    else if (clockPID == 0)
     {
         execl("clk.out", "clk.out", NULL);
         perror("Error creating clock process!\n");
@@ -113,12 +119,12 @@ int main(int argc, char *argv[])
     }
 
     pid_t schedulerPID = fork();
-    if(schedulerPID == -1)
+    if (schedulerPID == -1)
     {
         perror("Error creating scheduler process!\n");
         exit(1);
     }
-    if(schedulerPID == 0)
+    if (schedulerPID == 0)
     {
         char sch[5];
         sprintf(sch, "%d", schedulingAlgorithm);
@@ -132,7 +138,7 @@ int main(int argc, char *argv[])
 
     // 4. Use this function after creating the clock process to initialize clock.
     initClk();
-    // To get time use this function. 
+    // To get time use this function.
     int x = getClk();
     printf("Current Time is %d\n", x);
 
@@ -140,50 +146,71 @@ int main(int argc, char *argv[])
     // 5. Create a data structure for processes and provide it with its parameters.
     /*DONE WHILE READING THE FILE DURING REQUIREMENT#1*/
 
-    // 6. Send the information to the scheduler at the appropriate time.  
+    // 6. Send the information to the scheduler at the appropriate time.
     key_t msgqKey = ftok("keyfile.txt", MQKEY);
-    msgqID = msgget(msgqKey, 0666 | IPC_CREAT); 
-    if(msgqID == -1)
+    msgqID = msgget(msgqKey, 0666 | IPC_CREAT);
+    if (msgqID == -1)
     {
         perror("Error creating message queue");
         exit(1);
     }
 
+    struct Message_Action sentAction;
+
+    sentAction.mType = schedulerPID;
+    sentAction.time = currentTime;
+    sentAction.action = ACT_START;
+
+    msgsnd(msgqID, &sentAction, sizeof(sentAction.time) + sizeof(sentAction.action), !IPC_NOWAIT);
+
     struct Message_Process sentProcess;
 
     while (processQueue->start)
     {
-        while(processQueue->start->arrivalTime < getClk());
-        sentProcess.mType = schedulerPID;
-        sentProcess.attachedProcess.id = processQueue->start->id;
-        sentProcess.attachedProcess.arrivalTime = processQueue->start->arrivalTime;
-        sentProcess.attachedProcess.runTime = processQueue->start->runTime;
-        sentProcess.attachedProcess.priority = processQueue->start->priority;
-        free(dequeue_Process(processQueue));
+        if (currentTime < getClk())
+        {
+            while (processQueue->start && processQueue->start->arrivalTime <= currentTime)
+            {
+                sentProcess.mType = schedulerPID;
+                sentProcess.attachedProcess.id = processQueue->start->id;
+                sentProcess.attachedProcess.arrivalTime = processQueue->start->arrivalTime;
+                sentProcess.attachedProcess.runTime = processQueue->start->runTime;
+                sentProcess.attachedProcess.priority = processQueue->start->priority;
+                free(dequeue_Process(processQueue));
 
-        msgsnd(msgqID, &sentProcess, sizeof(sentProcess.attachedProcess), !IPC_NOWAIT);
+                msgsnd(msgqID, &sentProcess, sizeof(sentProcess.attachedProcess), !IPC_NOWAIT);
+            }
+
+            currentTime++;
+        }
     }
+
+    sentAction.mType = schedulerPID;
+    sentAction.time = currentTime;
+    sentAction.action = ACT_STOP;
+
+    msgsnd(msgqID, &sentAction, sizeof(sentAction.time) + sizeof(sentAction.action), !IPC_NOWAIT);
 
     free(processQueue);
 
     // 7. Clear clock resources
     int pStatus;
-    while(true)
+    while (true)
     {
         waitpid(schedulerPID, &pStatus, 0);
         if (WIFEXITED(pStatus))
         {
             break;
-        } 
+        }
     }
-    
+
     clearResources(SIGINT);
-    exit(0);
 }
 
 void clearResources(int signum)
 {
-    //TODO Clears all resources in case of interruption
-    msgctl(msgqID, IPC_RMID, (struct msqid_ds*) 0);
+    // TODO Clears all resources in case of interruption
+    msgctl(msgqID, IPC_RMID, (struct msqid_ds *)0);
     destroyClk(true);
+    exit(0);
 }
