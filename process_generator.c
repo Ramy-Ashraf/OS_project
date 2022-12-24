@@ -1,13 +1,17 @@
 #include "headers.h"
 
+void passTime(int signum);
 void clearResources(int signum);
 
 int msgqID;
 int currentTime = 0;
+int clkTime = 0;
 
 int main(int argc, char *argv[])
 {
+    signal(SIGUSR1, passTime);
     signal(SIGINT, clearResources);
+
     // TODO Initialization
     // 1. Read the input files.
     struct Queue_Process *processQueue = createQueue_Process();
@@ -102,6 +106,20 @@ int main(int argc, char *argv[])
             }
             quantum = q;
         }
+        else
+        {
+            if (argc > 4)
+            {
+                perror("Error! This scheduling algorithm doesn't take any parameters\n");
+                exit(1);
+            }
+        }
+
+        if (argc > 6)
+        {
+            perror("Error! Too many arguments\n");
+            exit(1);
+        }
     }
 
     // 3. Initiate and create the scheduler and clock processes.
@@ -137,10 +155,7 @@ int main(int argc, char *argv[])
     }
 
     // 4. Use this function after creating the clock process to initialize clock.
-    initClk();
-    // To get time use this function.
-    int x = getClk();
-    printf("Current Time is %d\n", x);
+    /*INITIALIZED IN SCHEDULER*/
 
     // TODO Generation Main Loop
     // 5. Create a data structure for processes and provide it with its parameters.
@@ -157,7 +172,7 @@ int main(int argc, char *argv[])
 
     struct Message_Action sentAction;
 
-    sentAction.mType = schedulerPID;
+    sentAction.mType = getpid();
     sentAction.time = currentTime;
     sentAction.action = ACT_START;
 
@@ -167,11 +182,11 @@ int main(int argc, char *argv[])
 
     while (processQueue->start)
     {
-        if (currentTime < getClk())
+        if (currentTime < clkTime)
         {
             while (processQueue->start && processQueue->start->arrivalTime <= currentTime)
             {
-                sentProcess.mType = schedulerPID;
+                sentProcess.mType = getpid();
                 sentProcess.attachedProcess.id = processQueue->start->id;
                 sentProcess.attachedProcess.arrivalTime = processQueue->start->arrivalTime;
                 sentProcess.attachedProcess.runTime = processQueue->start->runTime;
@@ -185,7 +200,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    sentAction.mType = schedulerPID;
+    sentAction.mType = getpid();
     sentAction.time = currentTime;
     sentAction.action = ACT_STOP;
 
@@ -205,6 +220,11 @@ int main(int argc, char *argv[])
     }
 
     clearResources(SIGINT);
+}
+
+void passTime(int signum)
+{
+    clkTime++;
 }
 
 void clearResources(int signum)
