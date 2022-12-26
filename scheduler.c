@@ -6,6 +6,7 @@ void clearResources(int signum);
 int msgqID;
 int currentTime = 0;
 int clkTime = 0;
+int skippedCycles = 0;
 bool running = false;
 
 void Algorithm_SJF(struct Queue_Log **const logQueue, int *const processorIdleTime, int *const processWaitingTime, float *const processWeightedTurnaround, int *const processNumber);
@@ -195,13 +196,24 @@ void Algorithm_SJF(struct Queue_Log **const logQueue, int *const processorIdleTi
 
         if (clkTime < getClk())
         {
-            kill(getppid(), SIGUSR1);
-            for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+            if (skippedCycles == CYCLE_SKIPS)
             {
-                kill(i->pid, SIGUSR1);
+                passTime(SIGUSR1);
+                skippedCycles = 0;
             }
-            passTime(SIGUSR1);
-            sleep(1);
+            else
+            {
+                if (skippedCycles == 0)
+                {
+                    kill(getppid(), SIGUSR1);
+                    for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+                    {
+                        kill(i->pid, SIGUSR1);
+                    }
+                }
+                    skippedCycles++;
+                    sleep(1);
+            }          
         }
     }
     free(queue);
@@ -270,13 +282,24 @@ void Algorithm_HPF(struct Queue_Log **const logQueue, int *const processorIdleTi
 
         if (clkTime < getClk())
         {
-            kill(getppid(), SIGUSR1);
-            for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+            if (skippedCycles == CYCLE_SKIPS)
             {
-                kill(i->pid, SIGUSR1);
+                passTime(SIGUSR1);
+                skippedCycles = 0;
             }
-            passTime(SIGUSR1);
-            sleep(1);
+            else
+            {
+                if (skippedCycles == 0)
+                {
+                    kill(getppid(), SIGUSR1);
+                    for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+                    {
+                        kill(i->pid, SIGUSR1);
+                    }
+                }
+                    skippedCycles++;
+                    sleep(1);
+            }          
         }
     }
     free(queue);
@@ -347,13 +370,24 @@ void Algorithm_RR(int *const quantum, struct Queue_Log **const logQueue, int *co
 
         if (clkTime < getClk())
         {
-            kill(getppid(), SIGUSR1);
-            for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+            if (skippedCycles == CYCLE_SKIPS)
             {
-                kill(i->pid, SIGUSR1);
+                passTime(SIGUSR1);
+                skippedCycles = 0;
             }
-            passTime(SIGUSR1);
-            sleep(1);
+            else
+            {
+                if (skippedCycles == 0)
+                {
+                    kill(getppid(), SIGUSR1);
+                    for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+                    {
+                        kill(i->pid, SIGUSR1);
+                    }
+                }
+                    skippedCycles++;
+                    sleep(1);
+            }          
         }
     }
     free(queue);
@@ -538,13 +572,24 @@ void Algorithm_MLFQ(struct Queue_Log **const logQueue, int *const processorIdleT
 
         if (clkTime < getClk())
         {
-            kill(getppid(), SIGUSR1);
-            for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+            if (skippedCycles == CYCLE_SKIPS)
             {
-                kill(i->pid, SIGUSR1);
+                passTime(SIGUSR1);
+                skippedCycles = 0;
             }
-            passTime(SIGUSR1);
-            sleep(0.5);
+            else
+            {
+                if (skippedCycles == 0)
+                {
+                    kill(getppid(), SIGUSR1);
+                    for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+                    {
+                        kill(i->pid, SIGUSR1);
+                    }
+                }
+                skippedCycles++;
+                sleep(1);
+            }          
         }
     }
     free(queue);

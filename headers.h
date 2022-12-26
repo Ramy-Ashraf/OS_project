@@ -21,6 +21,8 @@ typedef short bool;
 #define SHKEY 300
 #define MQKEY 1337
 
+#define CYCLE_SKIPS 1
+
 enum Algorithm
 {
     ALGO_SJF = 1,
