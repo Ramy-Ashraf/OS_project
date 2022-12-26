@@ -315,6 +315,7 @@ void Algorithm_RR(int *const quantum, struct Queue_Log **const logQueue, int *co
     struct Message_Action receivedAction;
     struct Message_Process receivedProcess;
 
+    // receive processes from process generator
     while (running || queue->start)
     {
         bool stopped = (msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getppid(), IPC_NOWAIT) != -1);
@@ -351,6 +352,7 @@ void Algorithm_RR(int *const quantum, struct Queue_Log **const logQueue, int *co
             sentAction.time = currentTime;
             sentAction.action = ACT_STOP;
 
+            // send the current time of the schedular to the new process
             msgsnd(msgqID, &sentAction, sizeof(sentAction.time) + sizeof(sentAction.action), !IPC_NOWAIT);
 
             stopped = (msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getppid(), IPC_NOWAIT) != -1);
