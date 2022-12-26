@@ -258,8 +258,8 @@ void Algorithm_HPF(struct Queue_Log **const logQueue, int *const processorIdleTi
             struct Node_PCB *newPCB = createPCB(processPID, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
 
             /*Change this line as needed*/
-            normalEnqueue_PCB(queue, newPCB);
-
+            priorityEnqueue_PCB(queue, newPCB, newPCB->priority);
+            
             sentAction.mType = newPCB->pid;
             sentAction.time = currentTime;
             sentAction.action = ACT_STOP;
@@ -276,6 +276,7 @@ void Algorithm_HPF(struct Queue_Log **const logQueue, int *const processorIdleTi
 
         if (currentTime < clkTime)
         {
+            //write code here
 
             currentTime++;
         }
@@ -488,7 +489,7 @@ void Algorithm_MLFQ(struct Queue_Log **const logQueue, int *const processorIdleT
                         enqueue_Log(*logQueue, createLog(currentTime, EV_FINISHED, runningPCB));
 
                         (*processWaitingTime) += runningPCB->waitingTime;
-                        (*processWeightedTurnaround) += (float)((runningPCB->executionTime + runningPCB->waitingTime) / runningPCB->executionTime);
+                        (*processWeightedTurnaround) += ((float)(runningPCB->executionTime + runningPCB->waitingTime) / runningPCB->executionTime);
                         (*processNumber)++;
 
                         free(runningPCB->process);
