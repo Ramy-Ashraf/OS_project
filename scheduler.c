@@ -6,6 +6,7 @@ void clearResources(int signum);
 int msgqID;
 int currentTime = 0;
 int clkTime = 0;
+int skipTime = 0;
 bool running = false;
 
 void Algorithm_SJF(struct Queue_Log **const logQueue, int *const processorIdleTime, int *const processWaitingTime, float *const processWeightedTurnaround, int *const processNumber);
@@ -43,6 +44,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    // Wait for "start" action sent by Process Generator before continuing
     struct Message_Action receivedAction;
     msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getppid(), !IPC_NOWAIT);
 
@@ -134,19 +136,261 @@ void clearResources(int signum)
 /*IMPLEMENT SHORTEST JOB FIRST ALGORITHM*/
 void Algorithm_SJF(struct Queue_Log **const logQueue, int *const processorIdleTime, int *const processWaitingTime, float *const processWeightedTurnaround, int *const processNumber)
 {
-    
+    struct Queue_PCB *queue = createQueue_PCB();
+    struct Node_PCB *runningPCB = NULL;
+
+    struct Message_Action receivedAction;
+    struct Message_Process receivedProcess;
+
+    while (running || queue->start)
+    {
+        bool stopped = (msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getppid(), IPC_NOWAIT) != -1);
+        while (!stopped)
+        {
+            if (msgrcv(msgqID, &receivedProcess, sizeof(receivedProcess.attachedProcess), getppid(), IPC_NOWAIT) == -1)
+            {
+                break;
+            }
+
+            pid_t processPID = fork();
+            if (processPID == -1)
+            {
+                perror("Error creating new process!\n");
+                exit(1);
+            }
+            else if (processPID == 0)
+            {
+                char rt[5];
+                sprintf(rt, "%d", receivedProcess.attachedProcess.runTime);
+
+                execl("process.out", "process.out", rt, NULL);
+                perror("Error creating new process!\n");
+                exit(1);
+            }
+
+            struct Message_Action sentAction;
+            struct Node_PCB *newPCB = createPCB(processPID, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
+
+            /*Change this line as needed*/
+            normalEnqueue_PCB(queue, newPCB);
+
+            sentAction.mType = newPCB->pid;
+            sentAction.time = currentTime;
+            sentAction.action = ACT_STOP;
+
+            msgsnd(msgqID, &sentAction, sizeof(sentAction.time) + sizeof(sentAction.action), !IPC_NOWAIT);
+
+            stopped = (msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getppid(), IPC_NOWAIT) != -1);
+        }
+
+        if (stopped)
+        {
+            running = receivedAction.action == ACT_START;
+        }
+
+        if (currentTime < clkTime)
+        {
+
+            currentTime++;
+        }
+
+        if (clkTime < getClk())
+        {
+            if (skipTime == 0)
+            {
+                kill(getppid(), SIGUSR1);
+                for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+                {
+                    kill(i->pid, SIGUSR1);
+                }
+
+                skipTime = getClk() + CYCLE_SKIPS;
+            }
+            else 
+            {
+                if (skipTime <= getClk())
+                {
+                    passTime(SIGUSR1);
+                    skipTime = 0;
+                }
+            }
+        }
+    }
+    free(queue);
 }
 
 /*IMPLEMENT HIGHEST PRIORITY FIRST ALGORITHM*/
 void Algorithm_HPF(struct Queue_Log **const logQueue, int *const processorIdleTime, int *const processWaitingTime, float *const processWeightedTurnaround, int *const processNumber)
 {
+    struct Queue_PCB *queue = createQueue_PCB();
+    struct Node_PCB *runningPCB = NULL;
 
+    struct Message_Action receivedAction;
+    struct Message_Process receivedProcess;
+
+    while (running || queue->start)
+    {
+        bool stopped = (msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getppid(), IPC_NOWAIT) != -1);
+        while (!stopped)
+        {
+            if (msgrcv(msgqID, &receivedProcess, sizeof(receivedProcess.attachedProcess), getppid(), IPC_NOWAIT) == -1)
+            {
+                break;
+            }
+
+            pid_t processPID = fork();
+            if (processPID == -1)
+            {
+                perror("Error creating new process!\n");
+                exit(1);
+            }
+            else if (processPID == 0)
+            {
+                char rt[5];
+                sprintf(rt, "%d", receivedProcess.attachedProcess.runTime);
+
+                execl("process.out", "process.out", rt, NULL);
+                perror("Error creating new process!\n");
+                exit(1);
+            }
+
+            struct Message_Action sentAction;
+            struct Node_PCB *newPCB = createPCB(processPID, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
+
+            /*Change this line as needed*/
+            normalEnqueue_PCB(queue, newPCB);
+
+            sentAction.mType = newPCB->pid;
+            sentAction.time = currentTime;
+            sentAction.action = ACT_STOP;
+
+            msgsnd(msgqID, &sentAction, sizeof(sentAction.time) + sizeof(sentAction.action), !IPC_NOWAIT);
+
+            stopped = (msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getppid(), IPC_NOWAIT) != -1);
+        }
+
+        if (stopped)
+        {
+            running = receivedAction.action == ACT_START;
+        }
+
+        if (currentTime < clkTime)
+        {
+
+            currentTime++;
+        }
+
+        if (clkTime < getClk())
+        {
+            if (skipTime == 0)
+            {
+                kill(getppid(), SIGUSR1);
+                for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+                {
+                    kill(i->pid, SIGUSR1);
+                }
+
+                skipTime = getClk() + CYCLE_SKIPS;
+            }
+            else 
+            {
+                if (skipTime <= getClk())
+                {
+                    passTime(SIGUSR1);
+                    skipTime = 0;
+                }
+            }
+        }
+    }
+    free(queue);
 }
 
 /*IMPLEMENT ROUND ROBIN ALGORITHM*/
 void Algorithm_RR(int *const quantum, struct Queue_Log **const logQueue, int *const processorIdleTime, int *const processWaitingTime, float *const processWeightedTurnaround, int *const processNumber)
 {
+    struct Queue_PCB *queue = createQueue_PCB();
+    struct Node_PCB *runningPCB = NULL;
+    int nextEvent = -1;
 
+    struct Message_Action receivedAction;
+    struct Message_Process receivedProcess;
+
+    while (running || queue->start)
+    {
+        bool stopped = (msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getppid(), IPC_NOWAIT) != -1);
+        while (!stopped)
+        {
+            if (msgrcv(msgqID, &receivedProcess, sizeof(receivedProcess.attachedProcess), getppid(), IPC_NOWAIT) == -1)
+            {
+                break;
+            }
+
+            pid_t processPID = fork();
+            if (processPID == -1)
+            {
+                perror("Error creating new process!\n");
+                exit(1);
+            }
+            else if (processPID == 0)
+            {
+                char rt[5];
+                sprintf(rt, "%d", receivedProcess.attachedProcess.runTime);
+
+                execl("process.out", "process.out", rt, NULL);
+                perror("Error creating new process!\n");
+                exit(1);
+            }
+
+            struct Message_Action sentAction;
+            struct Node_PCB *newPCB = createPCB(processPID, createProcess(receivedProcess.attachedProcess.id, receivedProcess.attachedProcess.arrivalTime, receivedProcess.attachedProcess.runTime, receivedProcess.attachedProcess.priority));
+
+            /*Change this line as needed*/
+            normalEnqueue_PCB(queue, newPCB);
+
+            sentAction.mType = newPCB->pid;
+            sentAction.time = currentTime;
+            sentAction.action = ACT_STOP;
+
+            msgsnd(msgqID, &sentAction, sizeof(sentAction.time) + sizeof(sentAction.action), !IPC_NOWAIT);
+
+            stopped = (msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getppid(), IPC_NOWAIT) != -1);
+        }
+
+        if (stopped)
+        {
+            running = receivedAction.action == ACT_START;
+        }
+
+        if (currentTime < clkTime)
+        {
+
+            currentTime++;
+            nextEvent--;
+        }
+
+        if (clkTime < getClk())
+        {
+            if (skipTime == 0)
+            {
+                kill(getppid(), SIGUSR1);
+                for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+                {
+                    kill(i->pid, SIGUSR1);
+                }
+
+                skipTime = getClk() + CYCLE_SKIPS;
+            }
+            else 
+            {
+                if (skipTime <= getClk())
+                {
+                    passTime(SIGUSR1);
+                    skipTime = 0;
+                }
+            }
+        }
+    }
+    free(queue);
 }
 
 /*IMPLEMENT MULTILEVEL FEEDBACK QUEUE ALGORITHM*/
@@ -244,7 +488,7 @@ void Algorithm_MLFQ(struct Queue_Log **const logQueue, int *const processorIdleT
                         enqueue_Log(*logQueue, createLog(currentTime, EV_FINISHED, runningPCB));
 
                         (*processWaitingTime) += runningPCB->waitingTime;
-                        (*processWeightedTurnaround) += (float)((runningPCB-> executionTime + runningPCB->waitingTime)/runningPCB->executionTime);
+                        (*processWeightedTurnaround) += (float)((runningPCB->executionTime + runningPCB->waitingTime) / runningPCB->executionTime);
                         (*processNumber)++;
 
                         free(runningPCB->process);
@@ -328,13 +572,24 @@ void Algorithm_MLFQ(struct Queue_Log **const logQueue, int *const processorIdleT
 
         if (clkTime < getClk())
         {
-            kill(getppid(), SIGUSR1);
-            for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+            if (skipTime == 0)
             {
-                kill(i->pid, SIGUSR1);
+                kill(getppid(), SIGUSR1);
+                for (struct Node_PCB *i = queue->start; i != NULL; i = i->next)
+                {
+                    kill(i->pid, SIGUSR1);
+                }
+
+                skipTime = getClk() + CYCLE_SKIPS;
             }
-            passTime(SIGUSR1);
-            sleep(1);
+            else 
+            {
+                if (skipTime <= getClk())
+                {
+                    passTime(SIGUSR1);
+                    skipTime = 0;
+                }
+            }
         }
     }
     free(queue);
