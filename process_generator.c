@@ -35,19 +35,19 @@ int main(int argc, char *argv[])
         int runTime;
         int priority;
 
-        for (int i = 0; i < 5; i++)
+        while(true) //While loop to read from the file
         {
             int result = fscanf(inputFile, "%d\t%d\t%d\t%d", &id, &arrivalTime, &runTime, &priority);
 
-            if (result == EOF)
+            if (result == EOF)  //If at end oof file, break out of loop
             {
                 break;
             }
-            else if (result == 4)
+            else if (result == 4)   //If line is correct (found 4 integers), enqueue a new process
             {
                 enqueue_Process(processQueue, createProcess(id, arrivalTime, runTime, priority));
             }
-            else
+            else    //Skip this line
             {
                 while (fgetc(inputFile) != '\n')
                     ;
@@ -176,15 +176,16 @@ int main(int argc, char *argv[])
     sentAction.time = currentTime;
     sentAction.action = ACT_START;
 
+    //Send "start" action to scheduler
     msgsnd(msgqID, &sentAction, sizeof(sentAction.time) + sizeof(sentAction.action), !IPC_NOWAIT);
 
     struct Message_Process sentProcess;
 
-    while (processQueue->start)
+    while (processQueue->start) //If process queue is not empty
     {
-        if (currentTime < clkTime)
+        if (currentTime < clkTime)  //If the process generator is late and should execute it's code
         {
-            while (processQueue->start && processQueue->start->arrivalTime <= currentTime)
+            while (processQueue->start && processQueue->start->arrivalTime <= currentTime)  //If the current process should be sent out (Arrival time <= Current time)
             {
                 sentProcess.mType = getpid();
                 sentProcess.attachedProcess.id = processQueue->start->id;
@@ -200,6 +201,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    //Send "stop" action to scheduler
     sentAction.mType = getpid();
     sentAction.time = currentTime;
     sentAction.action = ACT_STOP;

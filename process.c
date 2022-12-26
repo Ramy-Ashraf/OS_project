@@ -29,6 +29,7 @@ int main(int agrc, char *argv[])
     struct Message_Action receivedAction;
     int eventTime;
 
+    //Get current time from scheduler
     msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getpid(), !IPC_NOWAIT);
     running = receivedAction.action == ACT_START;
     clkTime = receivedAction.time;
@@ -37,6 +38,7 @@ int main(int agrc, char *argv[])
 
     while (true)
     {
+        //If recieved a message from scheduler
         if (msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getpid(), IPC_NOWAIT) != -1)
         {
             struct Message_Action sentAction;
@@ -44,6 +46,7 @@ int main(int agrc, char *argv[])
             sentAction.time = eventTime;
             sentAction.action = receivedAction.action;
 
+            //Send event time (Waiting Time if Started, Execution time if Stopped)
             msgsnd(msgqID, &sentAction, sizeof(sentAction.time) + sizeof(sentAction.action), !IPC_NOWAIT);
 
             running = receivedAction.action == ACT_START;
