@@ -276,7 +276,54 @@ void Algorithm_HPF(struct Queue_Log **const logQueue, int *const processorIdleTi
 
         if (currentTime < clkTime)
         {
-            //write code here
+            // check if the running process is stopped
+            if (msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getpid(), IPC_NOWAIT) != -1)
+            {
+                runningPCB->executionTime += receivedAction.time;
+                runningPCB->remainingTime -= receivedAction.time;
+                runningPCB = queue->start;
+                
+                // dequeue the running process
+                free(dequeue_PCB(queue));
+                
+                struct Message_Action sentAction;
+
+                sentAction.mType = runningPCB->pid;
+                sentAction.time = currentTime;
+                sentAction.action = ACT_START;
+
+                msgsnd(msgqID, &sentAction, sizeof(sentAction.time) + sizeof(sentAction.action), !IPC_NOWAIT);
+                msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getpid(), !IPC_NOWAIT);
+                
+                // 3shan ana ba5od al waiting time w bazawed 3leh altime aly kol mara byo2af feh
+                runningPCB->waitingTime += receivedAction.time;
+            }
+            // check if running is not at the start of the queue
+            if (runningPCB != queue->start)
+            {
+                struct Message_Action sentAction;
+
+                sentAction.mType = runningPCB->pid;
+                sentAction.time = currentTime;
+                sentAction.action = ACT_STOP;
+
+                msgsnd(msgqID, &sentAction, sizeof(sentAction.time) + sizeof(sentAction.action), !IPC_NOWAIT);
+                msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getpid(), !IPC_NOWAIT);
+                
+                runningPCB->executionTime += receivedAction.time;
+                runningPCB->remainingTime -= receivedAction.time;
+                runningPCB = queue->start;
+
+                sentAction.mType = runningPCB->pid;
+                sentAction.time = currentTime;
+                sentAction.action = ACT_START;
+
+                msgsnd(msgqID, &sentAction, sizeof(sentAction.time) + sizeof(sentAction.action), !IPC_NOWAIT);
+                msgrcv(msgqID, &receivedAction, sizeof(receivedAction.time) + sizeof(receivedAction.action), getpid(), !IPC_NOWAIT);
+                
+                runningPCB->waitingTime += receivedAction.time;
+            }
+            
 
             currentTime++;
         }
